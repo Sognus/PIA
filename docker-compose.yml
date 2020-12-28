@@ -1,0 +1,40 @@
+version: '3.4'
+
+networks:
+  application:
+
+services:
+  nginx:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    networks:
+      - application
+    volumes:
+      - ./application/:/app
+    ports:
+      - 80:80
+    depends_on:
+      - uwsgi
+
+  uwsgi:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/uwsgi/Dockerfile
+    networks:
+      - application
+    volumes:
+      - ./application:/app
+
+  database:
+    image: postgres:12.4-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - application
+    environment:
+      - POSTGRES_PASSWORD=sognus
+      - POSTGRES_USER=sognus
