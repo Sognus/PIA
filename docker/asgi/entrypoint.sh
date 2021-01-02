@@ -1,4 +1,5 @@
 #!/bin/ash
+
 # Wait for database start
 while ! nc -z database 5432; do sleep 1; done;
 
@@ -7,5 +8,5 @@ python3 manage.py collectstatic --noinput
 python3 manage.py makemigrations
 python3 manage.py migrate
 
-# Run UWSGI
-uwsgi --ini /app/application.ini --plugin python3
+# Run ASGI - gunicorn server
+gunicorn application.asgi:application --bind 0.0.0.0 -k uvicorn.workers.UvicornWorker

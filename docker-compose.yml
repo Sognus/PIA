@@ -17,14 +17,14 @@ services:
     ports:
       - 80:80
     depends_on:
-      - uwsgi
+      - asgi
 
-  uwsgi:
-    hostname: 'uwsgi'
+  asgi:
+    hostname: 'asgi'
     restart: unless-stopped
     build:
       context: .
-      dockerfile: docker/uwsgi/Dockerfile
+      dockerfile: docker/asgi/Dockerfile
     networks:
       - application
     volumes:
