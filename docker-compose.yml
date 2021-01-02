@@ -5,6 +5,7 @@ networks:
 
 services:
   nginx:
+    hostname: 'nginx' 
     restart: unless-stopped
     build:
       context: .
@@ -19,6 +20,7 @@ services:
       - uwsgi
 
   uwsgi:
+    hostname: 'uwsgi'
     restart: unless-stopped
     build:
       context: .
@@ -27,8 +29,11 @@ services:
       - application
     volumes:
       - ./application:/app
+    depends_on:
+      - database
 
   database:
+    hostname: 'database'
     image: postgres:12.4-alpine
     restart: unless-stopped
     env_file:
@@ -36,5 +41,7 @@ services:
     networks:
       - application
     environment:
-      - POSTGRES_PASSWORD=sognus
-      - POSTGRES_USER=sognus
+      - POSTGRES_PASSWORD=pia
+      - POSTGRES_USER=pia
+    volumes:
+      - ./data:/var/lib/postgresql/data
