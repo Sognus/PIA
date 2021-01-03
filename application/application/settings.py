@@ -129,5 +129,9 @@ STATICFILES_FINDERS = [
 
 ]
 
+STATICFILES_DIRS = [
+    BASE_DIR / "application" / "static"
+]
+
 STATIC_ROOT = '/app/static'
 STATIC_URL = '/static/'

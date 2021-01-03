@@ -3,13 +3,15 @@ FROM alpine:3.7
 # Create directory /app
 RUN mkdir /app
 
-# ADD web application files to container
-ADD ./application /app
-VOLUME /app
+# COPY files for build
+COPY ./application/requirements.txt /app/requirements.txt
+COPY ./application/gunicorn.conf.py /app/gunicorn.conf.py 
 
-# ADD other files to container
-ADD docker/asgi/requirements.txt /app
+# COPY container entry point to container
+COPY ./docker/asgi/entrypoint.sh /entrypoint.sh
 
+# SET entry point script as runnable
+RUN chmod +x /entrypoint.sh
 
 # Work in /app folder
 WORKDIR /app
@@ -20,11 +22,8 @@ RUN \
     pip3 install --upgrade pip && \
     pip3 install -r /app/requirements.txt
 
-# ADD container entry point to container
-COPY docker/asgi/entrypoint.sh /entrypoint.sh
-
-# SET entry point script as runnable
-RUN chmod +x /entrypoint.sh
+# ADD APP to container
+VOLUME /app
 
 # Make port 8000 public
 EXPOSE 8000

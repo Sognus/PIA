@@ -4,3 +4,4 @@ httptools
 uvloop
 uvicorn
 gunicorn
+py3-validate-email

@@ -3,7 +3,7 @@
 
 {% block head %}
     {{ block.super }}
-    <link href="{% static 'core/css/login.css' %}" rel="stylesheet">
+    <link href="{% static 'core/css/register.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,7 @@
             <div class="login-form">
                 <form action="/login" method="post">
                     {% csrf_token %}
-                    <h2 class="text-center">Přihlášení</h2>
+                    <h2 class="text-center">Registrace</h2>
                     <div class="form-group">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -52,16 +52,16 @@
                     </div>
                     {% endif %}
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary login-btn btn-block">Přihlásit se</button>
+                        <button type="submit" class="btn btn-primary login-btn btn-block">Registrovat se</button>
                     </div>
                     <div class="or-seperator"><i>nebo</i></div>
-                    <p class="text-center">Přihlašte pomocí sociálních médií</p>
+                    <p class="text-center">Registrujte se pomocí sociálních médií</p>
                     <div class="text-center social-btn">
                         <a href="#" class="btn btn-secondary"><i class="fa fa-facebook"></i>&nbsp; Facebook</a>
                         <a href="#" class="btn btn-info"><i class="fa fa-twitter"></i>&nbsp; Twitter</a>
                     </div>
                 </form>
-                <p class="text-center text-muted small">Nemáte účet? <a href="/register">Registrujte se zde!</a></p>
+                <p class="text-center text-muted small">Vlastníte účet? <a href="/login">Přihlašte se zde!</a></p>
             </div>
         </div>
     </div>
