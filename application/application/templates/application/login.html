@@ -51,6 +51,15 @@
                         </div>
                     </div>
                     {% endif %}
+                    {% if form.errors.hidden is not None %}
+                    <div class="form-error">
+                        <div class="text-danger text-left">
+                            {% for key in form.errors.hidden %}
+                                - {{ key }} <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary login-btn btn-block">Přihlásit se</button>
                     </div>

@@ -1,4 +1,22 @@
 {% extends "lobby/base.html" %}
+{% load static %}
+
+{% block css %}
+    {{ block.super }}
+    <link href="{% static 'lobby/css/chat.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+{% endblock %}
+
 {% block content %}
-    <h1>Hlavní stránka lobby</h1>
+    <div class="row col-lg-12 mr-0 ml-0 pl-0 pr-0">
+        <div class="col-lg-8 bg-light m-0 p-0">
+            {% include "lobby/chat-panel.html" %}
+        </div>
+        <div class="col-lg-4 bg-info m-0 p-0">
+            {% include "lobby/chat-panel.html" %}
+        </div>
+    </div>
 {% endblock %}
