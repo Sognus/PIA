@@ -1,0 +1,21 @@
+.user-username {
+    line-height: 28px;
+}
+
+.user-button {
+    height: 28px;
+}
+
+.user-card {
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+.friends-button {
+    height: 28px;
+}
+
+.friends-card {
+    max-height: 300px;
+    overflow-y: scroll;
+}

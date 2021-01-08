@@ -30,7 +30,7 @@ urlpatterns = [
     # URLS of Applications
     path('lobby/', include('lobby.urls', namespace='lobby')),
     path('polls/', include('polls.urls', namespace='polls')),
-    path('admin/', admin.site.urls),
+    path('superadmin/', admin.site.urls),
 ]
 
 static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

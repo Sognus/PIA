@@ -4,6 +4,7 @@
 {% block css %}
     {{ block.super }}
     <link href="{% static 'lobby/css/chat.css' %}" rel="stylesheet">
+    <link href="{% static 'lobby/css/online.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block javascript %}
@@ -15,8 +16,9 @@
         <div class="col-lg-8 bg-light m-0 p-0">
             {% include "lobby/chat-panel.html" %}
         </div>
-        <div class="col-lg-4 bg-info m-0 p-0">
-            {% include "lobby/chat-panel.html" %}
+        <div class="col-lg-4 bg-light m-0 p-0">
+            {% include "lobby/user-list.html" %}
+            {% include "lobby/friends.html" %}
         </div>
     </div>
 {% endblock %}

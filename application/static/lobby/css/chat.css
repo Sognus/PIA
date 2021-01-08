@@ -6,7 +6,11 @@
 
 .chat-input {
     width: 100%;
-    height: 100%;
+}
+
+.chat-input-sizing {
+    max-height: 105px;
+    overflow-y: scroll;
 }
 
 html {
