@@ -5,3 +5,5 @@ uvloop
 uvicorn
 gunicorn
 py3-validate-email
+django-online-users
+channels

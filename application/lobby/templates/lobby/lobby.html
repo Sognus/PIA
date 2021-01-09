@@ -3,12 +3,16 @@
 
 {% block css %}
     {{ block.super }}
+    <link href="{% static 'lobby/css/lobby.css' %}" rel="stylesheet">
     <link href="{% static 'lobby/css/chat.css' %}" rel="stylesheet">
     <link href="{% static 'lobby/css/online.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block javascript %}
     {{ block.super }}
+    <script src="{% static 'lobby/js/friends.js' %}"></script>
+    <script src="{% static 'lobby/js/onlinelist.js' %}"></script>
+    <script src="{% static 'lobby/js/chat.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -17,8 +21,37 @@
             {% include "lobby/chat-panel.html" %}
         </div>
         <div class="col-lg-4 bg-light m-0 p-0">
-            {% include "lobby/user-list.html" %}
-            {% include "lobby/friends.html" %}
+            <div id="ajax-online-list">
+                <div id="ajax-online-list-data">
+                {% include "lobby/user-list.html" with onlinelist=onlinelist %}
+                </div>
+            </div>
+            <div id="ajax-friends">
+
+                <div class="modal fade" id="ConfirmModalCenter" tabindex="-1" role="dialog"
+                     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Odstranit z přátel?</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zrušit</button>
+                                <button type="button" class="btn btn-danger" id="friend-remove-confirm">Odstranit z
+                                    přátel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ajax-friends-data">
+                    {% include "lobby/friends.html" with friendlist=friendlist %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

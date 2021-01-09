@@ -1,0 +1,77 @@
+{% extends "pia/base.html" %}
+{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <link href="{% static 'core/css/login.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="main">
+        <div class="wrapper">
+            <div class="login-form">
+                <form action="/login" method="post">
+                    {% csrf_token %}
+                    <h2 class="text-center">Přihlášení</h2>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <span class="fa fa-user"></span>
+                                </span>
+                            </div>
+                            {{ form.username }}
+                        </div>
+                    </div>
+                    {% if form.errors.username is not None %}
+                    <div class="form-error">
+                        <div class="text-danger text-left">
+                            {% for key in form.errors.username %}
+                                - {{ key }} <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fa fa-lock"></i>
+                                </span>
+                            </div>
+                            {{ form.password }}
+                        </div>
+                    </div>
+                    {% if form.errors.password is not None %}
+                    <div class="form-error">
+                        <div class="text-danger text-left">
+                            {% for key in form.errors.password %}
+                                - {{ key }} <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if form.errors.hidden is not None %}
+                    <div class="form-error">
+                        <div class="text-danger text-left">
+                            {% for key in form.errors.hidden %}
+                                - {{ key }} <br>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary login-btn btn-block">Přihlásit se</button>
+                    </div>
+                    <div class="or-seperator"><i>nebo</i></div>
+                    <p class="text-center">Přihlašte pomocí sociálních médií</p>
+                    <div class="text-center social-btn">
+                        <a href="#" class="btn btn-secondary"><i class="fa fa-facebook"></i>&nbsp; Facebook</a>
+                        <a href="#" class="btn btn-info"><i class="fa fa-twitter"></i>&nbsp; Twitter</a>
+                    </div>
+                </form>
+                <p class="text-center text-muted small">Nemáte účet? <a href="/register">Registrujte se zde!</a></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

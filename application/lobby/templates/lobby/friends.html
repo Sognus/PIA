@@ -1,49 +1,45 @@
 {% load static %}
 
 <div class="card m-3">
-    <div class="card-header bg-success text-white fa-bold">
+    <div class="card-header bg-success text-white text-bold">
         Přátelé
     </div>
     <div class="card-body friends-card p-0">
         <ul class="list-group p-0">
-            <li class="list-group-item mb-0 pt-1 pb-1">
-                <div class="row">
-                    <div class="col-4 user-username">
-                        UserTest
-                    </div>
-                    <div class="col-8">
-                        <div class="float-right">
-                        <button class="btn btn-danger btn-sm friends-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Odebrat
-                        </button>
-                        <button class="btn btn-danger btn-sm friends-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Vyzvat
-                        </button>
+            {% if friendlist|length > 0 %}
+                {% for friend,status in friendlist.items %}
+                    <li class="list-group-item mb-0 pt-1 pb-1">
+                        <div class="row pl-0">
+                            <div class="col-7 pl-0 ml-0 user-username">
+                                {% if status == "online" %}
+                                    <span class="badge badge-pill badge-success">&nbsp</span>
+                                {% elif status == "away" %}
+                                    <span class="badge badge-pill badge-warning">&nbsp</span>
+                                {% else %}
+                                    <span class="badge badge-pill badge-danger">&nbsp</span>
+                                {% endif %}
+                                {{ friend.email }}
+                            </div>
+                            <div class="col-5">
+                                <div class="float-right">
+                                    <button class="btn btn-danger btn-sm friends-button" name="chat-button-send"
+                                            id="chat-button-send"
+                                            type="button" data-toggle="modal" data-id="{{ friend.id }}" data-target="#ConfirmModalCenter">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+
+                                    </button>
+                                    <button class="btn btn-danger btn-sm friends-button" name="chat-button-send"
+                                            id="chat-button-send"
+                                            type="button">Vyzvat
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </li>
-            <li class="list-group-item mb-0 pt-1 pb-1">
-                <div class="row">
-                    <div class="col-4 user-username">
-                        UserTest2
-                    </div>
-                    <div class="col-8">
-                        <div class="float-right">
-                        <button class="btn btn-danger btn-sm friends-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Odebrat
-                        </button>
-                        <button class="btn btn-danger btn-sm friends-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Vyzvat
-                        </button>
-                        </div>
-                    </div>
-                </div>
-            </li>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <div class="text-center">Nemáš žádné kamarády</div>
+            {% endif %}
         </ul>
     </div>
 </div>

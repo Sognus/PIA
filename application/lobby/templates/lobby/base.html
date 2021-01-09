@@ -13,7 +13,11 @@
     <title>KIV/PIA Piškvorky | {{ title }}</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="{% static 'lobby/bootstrap/css/bootstrap.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{%  static "core/css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{%  static "core/css/font-awesome.min.css" %}">
+
+    <script src="{% static 'lobby/jquery/jquery.js' %}"></script>
+    <script src="{% static 'lobby/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
     <!-- Ostatní CSS -->
     {% block css %}
@@ -54,10 +58,6 @@
     {% block content %}
     {% endblock %}
 </div>
-
-<!-- Bootstrap core JavaScript -->
-<script src="{% static 'lobby/jquery/jquery.js' %}"></script>
-<script src="{% static 'lobby/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
 <!-- Ostatní JS -->
 {% block javascript %}

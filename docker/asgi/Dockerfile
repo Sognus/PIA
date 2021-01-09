@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Prepare envinroment
 RUN \
-    apk add --update postgresql-dev gcc python3-dev musl-dev make && \
+    apk add --update postgresql-dev gcc python3-dev musl-dev make libffi-dev && \
     pip3 install --upgrade pip && \
     pip3 install -r /app/requirements.txt
 

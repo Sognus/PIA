@@ -9,5 +9,5 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 
 # Run ASGI - gunicorn server
-#gunicorn application.asgi:application --reload --bind 0.0.0.0 -k uvicorn.workers.UvicornWorker
-gunicorn application.asgi:application --config gunicorn.conf.py
+#gunicorn pia.asgi:application --reload --bind 0.0.0.0 -k uvicorn.workers.UvicornWorker
+gunicorn pia.asgi:application --config gunicorn.conf.py

@@ -1,49 +1,32 @@
 {% load static %}
 
 <div class="card m-3">
-    <div class="card-header bg-primary text-white fa-bold">
+    <div class="card-header bg-primary text-white text-bold">
         Aktivní uživatelé
     </div>
     <div class="card-body user-card  p-0">
         <ul class="list-group p-0">
-            <li class="list-group-item mb-0 pt-1 pb-1">
-                <div class="row">
-                    <div class="col-4 user-username">
-                        UserTest
-                    </div>
-                    <div class="col-8">
-                        <div class="float-right">
-                        <button class="btn btn-success btn-sm user-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Přítel
-                        </button>
-                        <button class="btn btn-danger btn-sm user-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Vyzvat
-                        </button>
+            {% for online in onlinelist %}
+                <li class="list-group-item mb-0 pt-1 pb-1">
+                    <div class="row">
+                        <div class="col-6 user-username">
+                            {{ online.user.email }}
+                        </div>
+                        <div class="col-6">
+                            <div class="float-right">
+                            <button class="btn btn-success btn-sm user-button" name="chat-button-send"
+                                    id="chat-button-send"
+                                    type="button">Přítel
+                            </button>
+                            <button class="btn btn-danger btn-sm user-button" name="chat-button-send"
+                                    id="chat-button-send"
+                                    type="button">Vyzvat
+                            </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </li>
-            <li class="list-group-item mb-0 pt-1 pb-1">
-                <div class="row">
-                    <div class="col-4 user-username">
-                        UserTest2
-                    </div>
-                    <div class="col-8">
-                        <div class="float-right">
-                        <button class="btn btn-success btn-sm user-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Přítel
-                        </button>
-                        <button class="btn btn-danger btn-sm user-button" name="chat-button-send"
-                                id="chat-button-send"
-                                type="button">Vyzvat
-                        </button>
-                        </div>
-                    </div>
-                </div>
-            </li>
+                </li>
+            {% endfor %}
         </ul>
     </div>
 </div>
