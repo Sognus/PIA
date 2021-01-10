@@ -30,6 +30,7 @@ urlpatterns = [
     # URLS of Applications
     path('lobby/', include('lobby.urls', namespace='lobby')),
     path('polls/', include('polls.urls', namespace='polls')),
+    path('chat/', include('chat.urls')),
     path('superadmin/', admin.site.urls),
 ]
 

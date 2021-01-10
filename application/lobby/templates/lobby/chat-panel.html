@@ -1,44 +1,15 @@
 {% load static %}
 
 <div class="card m-3">
-    <div class="card-header text-white text-bold bg-success">
+    <div class="card-header text-white text-bold bg-primary">
         Chat
+        <button id="chat-reconnect" class="btn btn-warning float-right">
+            <i class="fa fa-refresh" aria-hidden="true"></i>
+        </button>
+
     </div>
     <div class="card-body p-0">
-        <ul class="list-group chat-entries list-group-flush p-0">
-            <li class="list-group-item">
-                <div class="row bg-info text-white">
-                    <div class="m-auto">
-                        User69
-                    </div>
-                </div>
-                 <div class="row ">
-                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                     labore et dolore magna aliqua. Ut enim ad minim veniam
-                 </div>
-            </li>
-            <li class="list-group-item">
-                <div class="row bg-info text-white">
-                    <div class="m-auto">
-                        User69
-                    </div>
-                </div>
-                 <div class="row ">
-                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                     labore et dolore magna aliqua. Ut enim ad minim veniam
-                 </div>
-            </li>
-            <li class="list-group-item">
-                <div class="row bg-info text-white">
-                    <div class="m-auto">
-                        User69
-                    </div>
-                </div>
-                 <div class="row ">
-                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                     labore et dolore magna aliqua. Ut enim ad minim veniam
-                 </div>
-            </li>
+        <ul id="chat-items" class="list-group chat-entries list-group-flush p-0">
         </ul>
         <hr class="m-0 p-0">
         <ul class="list-group chat-input-sizing list-group-flush p-0">

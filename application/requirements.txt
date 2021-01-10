@@ -7,3 +7,7 @@ gunicorn
 py3-validate-email
 django-online-users
 channels
+redis
+channels_redis
+websockets
+daphne

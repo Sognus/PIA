@@ -24,11 +24,12 @@ SECRET_KEY = '7rb5vxfc0__a=8e89ezj9p5n@*kkrtju-5-73=snni6!e0^*r2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1"]
+ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "*"]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'chat',
     'channels',
     'lobby.apps.LobbyConfig',
     'polls.apps.PollsConfig',
@@ -135,3 +136,12 @@ STATIC_URL = '/static/'
 
 # Django channels settings
 ASGI_APPLICATION = 'pia.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
