@@ -1,9 +1,6 @@
 django
 psycopg2-binary
 httptools
-uvloop
-uvicorn
-gunicorn
 py3-validate-email
 django-online-users
 channels
