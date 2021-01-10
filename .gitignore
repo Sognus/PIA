@@ -6,3 +6,6 @@
 
 # PostgreSQL data
 data/
+
+# Redis data
+storage/
