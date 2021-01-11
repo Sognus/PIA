@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from .models import Friends
+from .models import Friends, UserRequests
 
 from online_users.models import OnlineUserActivity
 
@@ -15,11 +15,15 @@ def index(request):
     # Get user activity
     user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
     online = (user for user in user_activity_objects)
+
     # Get friendlist
     friendlist = Friends.get_friends_for(request.user)
 
+    # Get unanswered requests
+    userRequestList = UserRequests.get_unanswered_for(request.user)
+
     # Render page
-    return render(request, "lobby/lobby.html", {"user": request.user, "onlinelist": online, "friendlist": friendlist})
+    return render(request, "lobby/lobby.html", {"user": request.user, "onlinelist": online, "friendlist": friendlist, "userRequestList": userRequestList})
 
 
 #

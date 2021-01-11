@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "*"]
 INSTALLED_APPS = [
     'chat',
     'channels',
+    'game.apps.GameConfig',
     'lobby.apps.LobbyConfig',
     'polls.apps.PollsConfig',
     'django.contrib.admin',

@@ -18,7 +18,6 @@
 
         // Event button confirm in modal
         $('#friend-remove-confirm').on('click', function (event) {
-            alert(friendRemoveId + " removed YEP!");
             RequestFriendRemove(friendRemoveId)
             $('#ConfirmModalCenter').modal("hide");
         })
@@ -39,7 +38,7 @@
             $.ajax({
                 url: '/lobby/ajax/friend/remove/'+id,
                 success: function(data) {
-                    RefreshFriendsAjax();
+                    RefreshInterval = setInterval(RefreshFriendsAjax, 1000);
                  }
                 });
         }
@@ -48,5 +47,3 @@
         RefreshInterval = setInterval(RefreshFriendsAjax, 1000);
 
     });
-
-        // Ajax send delete request

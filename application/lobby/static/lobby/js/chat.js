@@ -61,12 +61,7 @@ $(document).ready(function () {
         `;
 
         $("#chat-items").append(messageHTML);
-
-        chatSocket = new WebSocket(
-        'ws://'
-            + window.location.host
-            + '/ws/lobby/chat'
-        );
+        socket_connect()
 
     };
 

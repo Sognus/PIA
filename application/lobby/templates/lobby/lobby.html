@@ -13,6 +13,7 @@
     <script src="{% static 'lobby/js/friends.js' %}"></script>
     <script src="{% static 'lobby/js/onlinelist.js' %}"></script>
     <script src="{% static 'lobby/js/chat.js' %}"></script>
+    <script src="{% static 'lobby/js/requests.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -21,6 +22,11 @@
             {% include "lobby/chat-panel.html" %}
         </div>
         <div class="col-lg-4 bg-light m-0 p-0">
+            <div id="requests">
+                <div id="requests-list-data">
+                    {% include "lobby/requests.html" with userRequestList=userRequestList %}
+                </div>
+            </div>
             <div id="ajax-online-list">
                 <div id="ajax-online-list-data">
                 {% include "lobby/user-list.html" with onlinelist=onlinelist %}

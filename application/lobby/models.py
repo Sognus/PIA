@@ -1,16 +1,138 @@
-from datetime import timedelta
+import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.utils import timezone
+from django.utils.timezone import now
 
 from online_users.models import OnlineUserActivity
 
 
+class UserRequests(models.Model):
+    class Meta:
+        verbose_name = 'Požadavek uživatele'
+        verbose_name_plural = 'Požadavky uživatelů'
+
+    # ID is created by django
+    # Sender user
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender")
+    # Recipient user
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recipient")
+    # Request type
+    type = models.CharField(max_length=128)
+    # Request text
+    text = models.CharField(max_length=512)
+    # Additional data
+    data = models.JSONField(blank=True, null=True)
+    # If request got reaction
+    answered = models.BooleanField(default=False)
+    # Reaction - Not reacted, accepted, rejected
+    answer = models.NullBooleanField(default=None)
+    # time
+    time_sent = models.DateTimeField('time sent', default=now)
+
+    @staticmethod
+    def get_pending_request(sender, recipient, type):
+        # Get request of said type from sender to recipient
+        data_set = UserRequests.objects.filter(sender=sender, recipient=recipient, type=type, answered=False)
+
+        # If request type is game, check if found request is recent
+        filtered_data_set = list()
+        if type == "game":
+            for dato in data_set:
+                if dato.is_recent:
+                    filtered_data_set.append(dato)
+        if type == "friend":
+            filtered_data_set = list(data_set)
+
+        # If we have more than 0 results, sender indeed has pending request
+        return filtered_data_set
+
+    @staticmethod
+    def has_pending_request(sender, recipient, type):
+        filtered_data_set = UserRequests.get_pending_request(sender,recipient,type)
+        return len(filtered_data_set) > 0
+
+
+
+    @staticmethod
+    def create_request(sender, recipient, type, text, data=None):
+        new_request = UserRequests()
+        new_request.sender = sender
+        new_request.recipient = recipient
+        new_request.type = type
+        new_request.text = text
+
+        if data is not None:
+            new_request.data = data
+
+        new_request.save()
+        return new_request
+
+    @staticmethod
+    def get_unanswered_for(recipient):
+        gameSet = UserRequests.get_unanswered_for_game_online(recipient)
+        friendSet = UserRequests.get_unanswered_for_friend(recipient)
+        merged = gameSet + friendSet
+        return merged
+
+    # Returns unanswered requests for game only if sender is online
+    @staticmethod
+    def get_unanswered_for_game_online(recipient):
+        userQuery = Q(recipient=recipient)
+        answeredQuery = Q(answered=False)
+        typeQuery = Q(type="game")
+
+        # Check if user is online
+        dataset = UserRequests.objects.filter(userQuery & answeredQuery & typeQuery).order_by("time_sent")
+        result = list()
+        # Get online users
+        user_activity_objects = OnlineUserActivity.get_user_activities(datetime.timedelta(minutes=5))
+        onlinelist = [user.user for user in user_activity_objects]
+        # Filter online users
+        for data in dataset:
+            if data.sender in onlinelist and data.is_recent():
+                result.append(data)
+
+        return result
+
+    # Returns if request time is less than 3 minutes old
+    def is_recent(self):
+        now = timezone.now()
+        return now - datetime.timedelta(minutes=3) <= self.time_sent <= now
+
+    # Get friend request for user
+    @staticmethod
+    def get_unanswered_for_friend(recipient):
+        userQuery = Q(recipient=recipient)
+        answeredQuery = Q(answered=False)
+        typeQuery = Q(type="friend")
+        return list(UserRequests.objects.filter(userQuery & answeredQuery & typeQuery).order_by("time_sent"))
+
+
 # Friends model
 class Friends(models.Model):
+    class Meta:
+        verbose_name = 'Přátelé'
+        verbose_name_plural = 'Přátelé'
+
     user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user1")
     user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user2")
+
+
+    @staticmethod
+    def are_friends_id(id1, id2):
+        friends = Friends.objects.all()
+
+        for friend in friends:
+            if (id1 == friend.user1.id and id2 == friend.user2.id) or (
+                    id1 == friend.user2.id and id2 == friend.user1.id):
+                return True
+
+    @staticmethod
+    def are_friends(user1, user2):
+        return Friends.are_friends_id(user1.id, user2.id)
 
     @staticmethod
     def get_friends_for(target):
@@ -18,10 +140,10 @@ class Friends(models.Model):
         friends = Friends.objects.all()
 
         # Get online users
-        user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=5))
+        user_activity_objects = OnlineUserActivity.get_user_activities(datetime.timedelta(minutes=5))
         onlinelist = (user for user in user_activity_objects)
 
-        user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=10))
+        user_activity_objects = OnlineUserActivity.get_user_activities(datetime.timedelta(minutes=10))
         awaylist = (user for user in user_activity_objects)
 
         # Prepare result
@@ -61,7 +183,8 @@ class Friends(models.Model):
         friends = Friends.objects.all()
 
         for friend in friends:
-            if (id1 == friend.user1.id and id2 == friend.user2.id) or (id1 == friend.user2.id and id2 == friend.user1.id):
+            if (id1 == friend.user1.id and id2 == friend.user2.id) or (
+                    id1 == friend.user2.id and id2 == friend.user1.id):
                 friend.delete()
                 return True
 
