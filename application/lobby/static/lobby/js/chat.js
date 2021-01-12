@@ -60,12 +60,18 @@ $(document).ready(function () {
         </li>
         `;
 
+        chatSocket = null;
         $("#chat-items").append(messageHTML);
         socket_connect()
 
     };
 
     function socket_connect() {
+        if (chatSocket != null) {
+            return
+        }
+
+
         chatSocket = new WebSocket(
         'ws://'
         + window.location.host
