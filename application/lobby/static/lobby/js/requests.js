@@ -17,9 +17,9 @@ $(document).ready(function () {
             alert("Daný požadavek neexistuje!");
         }
 
-        if(friend_ack === "accept_success") {
-            req_id = data["request_id"];
-            req_html_id = "#request-id-"+ req_id
+        if(friend_ack === "request_accept") {
+            let req_id = data["request_id"];
+            let req_html_id = "#request-id-"+ req_id;
             if($(req_html_id).length) {
                 $(req_html_id).remove();
                 if($("#request-items").children().length < 2) {
@@ -27,6 +27,25 @@ $(document).ready(function () {
                 }
             }
             alert_async("Přátelství potvrzeno!");
+            return;
+        }
+
+        if(friend_ack === "request_reject_message") {
+            let message = data["message"];
+            alert_async(message);
+            return;
+        }
+
+        if(friend_ack === "request_reject") {
+            req_id = data["request_id"];
+            req_html_id = "#request-id-"+ req_id
+                        if($(req_html_id).length) {
+                $(req_html_id).remove();
+                if($("#request-items").children().length < 2) {
+                    $("#request-empty").show();
+                }
+            }
+            alert_async("Přátelství odmítnuto!");
             return;
         }
 
@@ -128,7 +147,7 @@ $(document).ready(function () {
         alert_async("Požadavek na přátelství odeslán");
     });
 
-    // Button - accept friend - simulate request
+    // Button - accept friend
     $(document).on("click", ".request-accept", function () {
         var json_data = {};
         json_data["context"] = "request_accept";
@@ -137,6 +156,19 @@ $(document).ready(function () {
 
         var send_json = JSON.stringify(json_data);
         requestSocket.send(send_json);
-    })
+    });
+
+    // Button - reject friend
+    $(document).on("click", ".request-reject", function () {
+        var json_data = {};
+        json_data["context"] = "request_reject";
+        json_data["request_id"] = $(this).data("id");
+        json_data["type"] = "friend";
+
+        var send_json = JSON.stringify(json_data);
+        requestSocket.send(send_json);
+    });
+
+
 
 });

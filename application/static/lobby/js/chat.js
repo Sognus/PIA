@@ -1,6 +1,7 @@
 $(document).ready(function () {
 
     var chatSocket = null;
+    var reconnect_attempt = 0;
 
     var socket_onopen = function (e) {
         const messageHTML = `
@@ -17,6 +18,7 @@ $(document).ready(function () {
         `;
 
         $("#chat-items").append(messageHTML);
+        reconnect_attempt = 0;
     };
 
 
@@ -60,8 +62,18 @@ $(document).ready(function () {
         </li>
         `;
 
+        try {
+            chatSocket.close();
+        } catch (e) {
+            // Ignore
+        }
         chatSocket = null;
-        $("#chat-items").append(messageHTML);
+
+        if(reconnect_attempt < 1) {
+            $("#chat-items").append(messageHTML);
+            reconnect_attempt = reconnect_attempt + 1;
+        }
+
         socket_connect()
 
     };

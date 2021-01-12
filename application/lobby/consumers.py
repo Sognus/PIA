@@ -33,9 +33,51 @@ class RequestConsumer(WebsocketConsumer):
         sender = self.user
         context = text_data_json["context"]
 
+        if context == "request_reject":
+            # Treat message as rejecting request
+            rtype = text_data_json["type"]
+
+            if rtype == "game":
+                pass
+
+            if rtype == "friend":
+                req_id = text_data_json["request_id"]
+                req_object = UserRequests.objects.filter(id=req_id).first()
+
+                if req_object is None:
+                    self.send(text_data=json.dumps({"request_friend_new_ack": "reject_missing"}))
+                    return
+
+                if self.user_object != req_object.sender and self.user_object != req_object.recipient:
+                    self.send(text_data=json.dumps({"request_friend_new_ack": "reject_permission"}))
+                    return
+
+                # Reject request
+                req_object.answered = True
+                req_object.answer = False
+                req_object.save()
+
+                # Notify sender and recipient
+                self.send(text_data=json.dumps({"request_friend_new_ack": "request_reject", "request_id": req_object.id}))
+
+                # Notify sender that request was rejected
+                target_group = "requests_user_" + str(req_object.sender.id)
+
+                async_to_sync(self.channel_layer.group_send)(
+                    target_group,
+                    {
+                        "type": "request_notify_reject",
+                        "message": "Tvůj požadavek o přátelství s " + req_object.recipient.email + " byl odmítnut",
+                        "request_id": req_object.id,
+                    }
+                )
+
+                return
+
+
         # Route based on context
         if context == "request_accept":
-            # Treat message as new request
+            # Treat message as accepting request
             rtype = text_data_json["type"]
 
             if rtype == "game":
@@ -63,8 +105,8 @@ class RequestConsumer(WebsocketConsumer):
                 friend.user2 = req_object.recipient
                 friend.save()
 
-                # Notify accepter to delete his record
-                self.send(text_data=json.dumps({"request_friend_new_ack": "accept_success", "request_id": req_object.id}))
+                # Notify rejecter to delete his record
+                self.send(text_data=json.dumps({"request_friend_new_ack": "request_accept", "request_id": req_object.id}))
                 return
 
         if context == "request_new":
@@ -152,9 +194,15 @@ class RequestConsumer(WebsocketConsumer):
                     }
                 )
 
-        if context == "request_response":
-            # Treat message as request response
-            pass
+    def request_notify_reject(self, event):
+        request_id = event["request_id"]
+        message = event["message"]
+
+        self.send(text_data=json.dumps({
+            "request_friend_new_ack": "request_reject_message",
+            "message": message,
+            "request_id": request_id,
+        }))
 
     def request_notify_merged(self, event):
         request_id = event["request_id"]
