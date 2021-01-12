@@ -37,19 +37,16 @@ class RequestConsumer(WebsocketConsumer):
             # Treat message as rejecting request
             rtype = text_data_json["type"]
 
-            if rtype == "game":
-                pass
-
-            if rtype == "friend":
+            if rtype == "game" or rtype == "friend":
                 req_id = text_data_json["request_id"]
                 req_object = UserRequests.objects.filter(id=req_id).first()
 
                 if req_object is None:
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "reject_missing"}))
+                    self.send(text_data=json.dumps({"request_new_ack": "reject_missing"}))
                     return
 
                 if self.user_object != req_object.sender and self.user_object != req_object.recipient:
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "reject_permission"}))
+                    self.send(text_data=json.dumps({"request_new_ack": "reject_permission"}))
                     return
 
                 # Reject request
@@ -58,22 +55,28 @@ class RequestConsumer(WebsocketConsumer):
                 req_object.save()
 
                 # Notify sender and recipient
-                self.send(text_data=json.dumps({"request_friend_new_ack": "request_reject", "request_id": req_object.id}))
+                self.send(text_data=json.dumps({"request_new_ack": "request_reject", "request_id": req_object.id}))
 
                 # Notify sender that request was rejected
                 target_group = "requests_user_" + str(req_object.sender.id)
+                req_type = ""
+
+                if req_object.type == "friend":
+                    req_type = "o přátelství"
+                elif req_object.type == "game":
+                    req_type = "o hru"
 
                 async_to_sync(self.channel_layer.group_send)(
                     target_group,
                     {
                         "type": "request_notify_reject",
-                        "message": "Tvůj požadavek o přátelství s " + req_object.recipient.email + " byl odmítnut",
+                        "message": "Tvůj požadavek " + req_type + " s " + req_object.recipient.email + " byl odmítnut",
                         "request_id": req_object.id,
+                        "rtype": "friend",
                     }
                 )
 
                 return
-
 
         # Route based on context
         if context == "request_accept":
@@ -86,12 +89,16 @@ class RequestConsumer(WebsocketConsumer):
                 req_id = text_data_json["request_id"]
                 req_object = UserRequests.objects.filter(id=req_id).first()
 
+                if req_object.type != "friend":
+                    self.send(text_data=json.dumps({"request_new_ack": "wrong_type"}))
+                    return
+
                 if req_object is None:
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "accept_missing"}))
+                    self.send(text_data=json.dumps({"request_new_ack": "accept_missing"}))
                     return
 
                 if self.user_object != req_object.sender and self.user_object != req_object.recipient:
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "accept_permission"}))
+                    self.send(text_data=json.dumps({"request_new_ack": "accept_permission"}))
                     return
 
                 # Set request responded true and positive
@@ -106,7 +113,7 @@ class RequestConsumer(WebsocketConsumer):
                 friend.save()
 
                 # Notify rejecter to delete his record
-                self.send(text_data=json.dumps({"request_friend_new_ack": "request_accept", "request_id": req_object.id}))
+                self.send(text_data=json.dumps({"request_new_ack": "request_accept", "request_id": req_object.id}))
                 return
 
         if context == "request_new":
@@ -116,12 +123,9 @@ class RequestConsumer(WebsocketConsumer):
             # Further route based on type
             if rtype == "game":
                 # Treat request as new game request
-                pass
-            if rtype == "friend":
-                # Treat request as new friend request
 
                 # Acknowledge request
-                self.send(text_data=json.dumps({"request_friend_new_ack": "acknowledged"}))
+                self.send(text_data=json.dumps({"request_new_ack": "acknowledged"}))
 
                 # Get recipient
                 id = text_data_json["recipient"]
@@ -130,17 +134,12 @@ class RequestConsumer(WebsocketConsumer):
 
                 # Check if user wants to friend himself
                 if recipient == self.user_object:
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "friends_self"}))
-                    return
-
-                # Check if users are already friends
-                if Friends.are_friends(self.user_object, recipient):
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "already_friends"}))
+                    self.send(text_data=json.dumps({"request_new_ack": "game_self"}))
                     return
 
                 # Check if recipient have pending request
                 if UserRequests.has_pending_request(self.user_object, recipient, rtype):
-                    self.send(text_data=json.dumps({"request_friend_new_ack": "already_pending"}))
+                    self.send(text_data=json.dumps({"request_new_ack": "already_pending"}))
                     return
 
                 other_side_requests = UserRequests.get_pending_request(recipient, self.user_object, rtype)
@@ -154,13 +153,89 @@ class RequestConsumer(WebsocketConsumer):
                         target_group,
                         {
                             "type": "request_notify_merged",
-                            "request_friend_new_ack": "merged",
+                            "request_new_ack": "merged",
+                            "request_id": other_side_requests[0].id,
+                            "rtype": "game",
+                        }
+                    )
+                    # Notify self
+                    self.send(text_data=json.dumps({
+                        "request_new_ack": "merged",
+                        "request_id": request_object.id,
+                    }))
+
+                    # Set request responded true and positive
+                    request_object.answered = True
+                    request_object.answer = True
+                    request_object.save()
+
+                    # Create game
+                    #TODO: Create game
+
+                    # Terminate rest of function
+                    return
+
+                # Actually create Request in database
+                request_text = "Uživatel " + self.user + " tě požádal o hru!"
+                request = UserRequests.create_request(self.user_object, recipient, "game", request_text)
+
+                # Send request to recipient
+                async_to_sync(self.channel_layer.group_send)(
+                    target_group,
+                    {
+                        "type": "request_notify",
+                        "message": request_text,
+                        'sender_name': self.user,
+                        "sender": self.user_id,
+                        "request_id": request.id,
+                        "rtype": "game",
+                    }
+                )
+                return
+            if rtype == "friend":
+                # Treat request as new friend request
+
+                # Acknowledge request
+                self.send(text_data=json.dumps({"request_new_ack": "acknowledged"}))
+
+                # Get recipient
+                id = text_data_json["recipient"]
+                recipient = User.objects.filter(id=id).first()
+                target_group = "requests_user_" + str(recipient.id)
+
+                # Check if user wants to friend himself
+                if recipient == self.user_object:
+                    self.send(text_data=json.dumps({"request_new_ack": "friends_self"}))
+                    return
+
+                # Check if users are already friends
+                if Friends.are_friends(self.user_object, recipient):
+                    self.send(text_data=json.dumps({"request_new_ack": "already_friends"}))
+                    return
+
+                # Check if recipient have pending request
+                if UserRequests.has_pending_request(self.user_object, recipient, rtype):
+                    self.send(text_data=json.dumps({"request_new_ack": "already_pending"}))
+                    return
+
+                other_side_requests = UserRequests.get_pending_request(recipient, self.user_object, rtype)
+
+                # Check pending request from other side
+                if len(other_side_requests) > 0:
+                    request_object = other_side_requests[0]
+
+                    # Notify other user
+                    async_to_sync(self.channel_layer.group_send)(
+                        target_group,
+                        {
+                            "type": "request_notify_merged",
+                            "request_new_ack": "merged",
                             "request_id": other_side_requests[0].id,
                         }
                     )
                     # Notify self
                     self.send(text_data=json.dumps({
-                        "request_friend_new_ack": "merged",
+                        "request_new_ack": "merged",
                         "request_id": request_object.id,
                     }))
 
@@ -191,16 +266,19 @@ class RequestConsumer(WebsocketConsumer):
                         'sender_name': self.user,
                         "sender": self.user_id,
                         "request_id": request.id,
+                        "rtype": "friend",
                     }
                 )
 
     def request_notify_reject(self, event):
         request_id = event["request_id"]
         message = event["message"]
+        rtype = event["rtype"]
 
         self.send(text_data=json.dumps({
-            "request_friend_new_ack": "request_reject_message",
+            "request_new_ack": "request_reject_message",
             "message": message,
+            "type": rtype,
             "request_id": request_id,
         }))
 
@@ -208,7 +286,7 @@ class RequestConsumer(WebsocketConsumer):
         request_id = event["request_id"]
 
         self.send(text_data=json.dumps({
-            "request_friend_new_ack": "merged",
+            "request_new_ack": "merged",
             "request_id": request_id,
         }))
 
@@ -218,14 +296,14 @@ class RequestConsumer(WebsocketConsumer):
         message = event["message"]
         sender = event["sender"]
         context = "request_new"
-        type = "friend"
+        rtype = event["rtype"]
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'sender_name': sender_name,
             "context": context,
             "sender": sender,
-            "type": type,
+            "type": rtype,
             "message": message,
             "request_id": request_id,
         }))

@@ -49,4 +49,4 @@ def ajax_online_list(request):
     # Get user activity
     user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
     online = (user for user in user_activity_objects)
-    return render(request, "lobby/user-list.html", {"onlinelist": online})
+    return render(request, "lobby/user-list.html", {"onlinelist": online, "currentUser": request.user})

@@ -13,6 +13,7 @@
                             {{ online.user.email }}
                         </div>
                         <div class="col-6">
+                            {% if currentUser.id != online.user.id  %}
                             <div class="float-right">
                             <button class="btn btn-success btn-sm user-button request-friend-send" data-id="{{ online.user.id }}"
                                     id="chat-button-send"
@@ -23,6 +24,11 @@
                                     type="button">Vyzvat
                             </button>
                             </div>
+                            {% else %}
+                              <div class="float-right">
+                              Aktuální uživatel
+                              </div>
+                            {% endif %}
                         </div>
                     </div>
                 </li>

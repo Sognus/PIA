@@ -18,6 +18,8 @@ services:
       - 80:80
     depends_on:
       - asgi
+    logging:
+      driver: none
 
   asgi:
     hostname: 'asgi'
