@@ -1,0 +1,126 @@
+{% extends "game/base.html" %}
+{% load static %}
+
+{% block css %}
+    {{ super.block }}
+    <style>
+        #playground {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row col-lg-12 mr-0 ml-0 pl-0 pr-0">
+        <div class="col-lg-8 bg-light m-0 p-0">
+            <div class="p-3">
+                <div id="playground">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 bg-light m-0 p-0">
+            {% include "lobby/chat-panel.html" %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        const stage = new Konva.Stage({
+            container: 'playground',
+            width: window.innerWidth,
+            height: window.innerHeight,
+            draggable: true
+        });
+
+        // Current grid
+        const gameGrid = {}
+
+        const layer = new Konva.Layer();
+        stage.add(layer);
+
+
+        const WIDTH = 100;
+        const HEIGHT = 100;
+
+        const grid = [
+            ['white', 'blue'],
+            ['blue', 'white'],
+        ];
+
+        function checkShapes() {
+            const startX = Math.floor((-stage.x() - stage.width()) / WIDTH) * WIDTH;
+            const endX = Math.floor((-stage.x() + stage.width() * 2) / WIDTH) * WIDTH;
+
+            const startY = Math.floor((-stage.y() - stage.height()) / HEIGHT) * HEIGHT;
+            const endY = Math.floor((-stage.y() + stage.height() * 2) / HEIGHT) * HEIGHT;
+
+
+            for (var x = startX; x < endX; x += WIDTH) {
+                for (var y = startY; y < endY; y += HEIGHT) {
+                    const indexX = Math.abs(x / WIDTH) % grid.length;
+                    const indexY = Math.abs(y / HEIGHT) % grid[0].length;
+
+                    const coordX = (x / WIDTH);
+                    const coordY = (y / HEIGHT);
+
+                    // Render grid
+                    var rect = new Konva.Rect({
+                        x,
+                        y,
+                        width: WIDTH,
+                        height: HEIGHT,
+                        fill: grid[indexX][indexY]
+                    })
+                    rect.coordX = coordX;
+                    rect.coordY = coordY;
+                    rect.on("click tap", function () {
+                        // Get item coords
+                        console.log("[" + this.coordX + " , " + this.coordY + "]");
+                        // Render stuff over it
+                        var newRect = new Konva.Rect({
+                            x: this.coordX * WIDTH,
+                            y: this.coordY * HEIGHT,
+                            width: WIDTH,
+                            height: HEIGHT,
+                            fill: "red",
+                        });
+                        layer.add(newRect);
+                        layer.draw();
+                    })
+                    layer.add(rect);
+                    gameGrid[coordX] = {coordY: rect}
+
+
+                    // Render debug coords
+                    var text = new Konva.Text({
+                        text: '' + coordX + " , " + coordY,
+                        x: x + WIDTH / 3,
+                        y: y + HEIGHT / 2,
+                        width: WIDTH,
+                        fontFamily: 'sans-serif',
+                        fontSize: HEIGHT / 6,
+                        fill: 'red'
+                    });
+                    layer.add(text);
+
+                }
+            }
+        }
+
+
+        checkShapes();
+        layer.draw();
+
+        stage.on('dragend', () => {
+            layer.destroyChildren();
+            checkShapes();
+            layer.draw();
+        })
+    </script>
+{% endblock %}
