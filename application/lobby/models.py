@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -8,6 +9,15 @@ from django.utils.timezone import now
 
 from online_users.models import OnlineUserActivity
 
+
+class PasswordResets(models.Model):
+    class Meta:
+        verbose_name = 'Reset hesla'
+        verbose_name_plural = 'Reset hesla'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
+    uuid = models.UUIDField(default=uuid.uuid4)
+    time_sent = models.DateTimeField('time sent', default=now)
 
 class UserRequests(models.Model):
     class Meta:

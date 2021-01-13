@@ -27,6 +27,8 @@ urlpatterns = [
     path('login', views.index, name='index'),
     path('register', views.register, name='register'),
     path('logout', views.log_out, name='logout'),
+    path('password-reset/<str:uuid_input>', views.password_reset, name='password_reset'),
+    path('password-reset', views.password_reset_form, name='password_reset_form'),
     # URLS of Applications
     path('lobby/', include('lobby.urls', namespace='lobby')),
     path('polls/', include('polls.urls', namespace='polls')),

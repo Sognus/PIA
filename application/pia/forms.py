@@ -3,6 +3,24 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 
 
+class NewPasswordForm(forms.Form):
+    password = forms.CharField(label="Heslo", widget=forms.PasswordInput(attrs={'class': 'form-control',
+                                                                                'placeholder': 'Heslo'}))
+    password2 = forms.CharField(label="Heslo znovu", widget=forms.PasswordInput(attrs={'class': 'form-control',
+                                                                                       'placeholder': 'Heslo znovu'}))
+
+    def clean(self):
+        data_password1 = self.cleaned_data["password"]
+        data_password2 = self.cleaned_data["password2"]
+
+        if data_password1 != data_password2:
+            self.add_error("password", "Hesla nesouhlasí!")
+
+
+class ResetForm(forms.Form):
+    username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control',
+                                                                              'placeholder': 'Email'}))
+
 class LoginForm(forms.Form):
     username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control',
                                                                               'placeholder': 'Email'}))
