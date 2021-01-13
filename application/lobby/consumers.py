@@ -6,6 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 from django.contrib.auth.models import User
 from online_users.models import OnlineUserActivity
 
+from game.models import Game
 from .models import UserRequests, Friends
 
 
@@ -47,7 +48,7 @@ class RequestConsumer(WebsocketConsumer):
                     self.send(text_data=json.dumps({"request_new_ack": "reject_missing"}))
                     return
 
-                if self.user_object != req_object.sender and self.user_object != req_object.recipient:
+                if self.user_object != req_object.recipient:
                     self.send(text_data=json.dumps({"request_new_ack": "reject_permission"}))
                     return
 
@@ -86,7 +87,72 @@ class RequestConsumer(WebsocketConsumer):
             rtype = text_data_json["type"]
 
             if rtype == "game":
-                pass
+                req_id = text_data_json["request_id"]
+                req_object = UserRequests.objects.filter(id=req_id).first()
+
+                # Request doesnt exist
+                if req_object is None:
+                    self.send(text_data=json.dumps({"request_new_ack": "accept_missing"}))
+                    return
+
+                # Request is wrong type
+                if req_object.type != "game":
+                    self.send(text_data=json.dumps({"request_new_ack": "wrong_type"}))
+                    return
+
+                # Block user from accepting request that isnt for him
+                if self.user_object != req_object.recipient:
+                    self.send(text_data=json.dumps({"request_new_ack": "accept_permission"}))
+                    return
+
+                # Get online users
+                user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
+                online = (user.user.id for user in user_activity_objects)
+
+                # User is not online
+                if not req_object.recipient.id in online:
+                    self.send(text_data=json.dumps({"request_new_ack": "not_online"}))
+                    return
+
+                # Check if sender is in game
+                sending = self.user_object
+
+                if Game.has_active_game(sending):
+                    self.send(text_data=json.dumps({"request_new_ack": "already_game_self"}))
+                    return
+
+                # Check if recipient is in game
+                if Game.has_active_game(req_object.recipient):
+                    self.send(text_data=json.dumps({"request_new_ack": "already_game"}))
+                    return
+
+                    # Create game
+                game_object = Game.create_game(req_object.sender, req_object.recipient)
+
+                # Notify players
+                target_recipient = "requests_user_" + str(game_object.player1.id)
+                target_sender = "requests_user_" + str(game_object.player2.id)
+
+                async_to_sync(self.channel_layer.group_send)(
+                    target_recipient,
+                    {
+                        "type": "request_notify_game",
+                        "request_new_ack": "game_start",
+                        "game_id": game_object.id,
+                    }
+                )
+
+                async_to_sync(self.channel_layer.group_send)(
+                    target_sender,
+                    {
+                        "type": "request_notify_game",
+                        "request_new_ack": "game_start",
+                        "game_id": game_object.id,
+                    }
+                )
+
+                return
+
             if rtype == "friend":
                 req_id = text_data_json["request_id"]
                 req_object = UserRequests.objects.filter(id=req_id).first()
@@ -139,8 +205,7 @@ class RequestConsumer(WebsocketConsumer):
                     self.send(text_data=json.dumps({"request_new_ack": "game_self"}))
                     return
 
-                # Check if recipient is online
-                # TODO:
+                # Get online users
                 user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
                 online = (user.user.id for user in user_activity_objects)
 
@@ -155,6 +220,19 @@ class RequestConsumer(WebsocketConsumer):
                     return
 
                 other_side_requests = UserRequests.get_pending_request(recipient, self.user_object, rtype)
+
+                # Check if sender is in game
+                sending = self.user_object
+                active_game_self = Game.get_active_game(sending)
+
+                if active_game_self is not None:
+                    self.send(text_data=json.dumps({"request_new_ack": "already_game_self", "game_id": active_game_self.id}))
+                    return
+
+                # Check if recipient is in game
+                if Game.has_active_game(recipient):
+                    self.send(text_data=json.dumps({"request_new_ack": "already_game"}))
+                    return
 
                 # Check pending request from other side
                 if len(other_side_requests) > 0:
@@ -182,7 +260,29 @@ class RequestConsumer(WebsocketConsumer):
                     request_object.save()
 
                     # Create game
-                    #TODO: Create game
+                    game_object = Game.create_game(request_object.sender, request_object.recipient)
+
+                    # Notify players
+                    target_recipient = "requests_user_" + str(game_object.player1.id)
+                    target_sender = "requests_user_" + str(game_object.player2.id)
+
+                    async_to_sync(self.channel_layer.group_send)(
+                        target_recipient,
+                        {
+                            "type": "request_notify_game",
+                            "request_new_ack": "game_start",
+                            "game_id": game_object.id,
+                        }
+                    )
+
+                    async_to_sync(self.channel_layer.group_send)(
+                        target_sender,
+                        {
+                            "type": "request_notify_game",
+                            "request_new_ack": "game_start",
+                            "game_id": game_object.id,
+                        }
+                    )
 
                     # Terminate rest of function
                     return
@@ -281,6 +381,14 @@ class RequestConsumer(WebsocketConsumer):
                         "rtype": "friend",
                     }
                 )
+
+    def request_notify_game(self, event):
+        game_id = event["game_id"]
+
+        self.send(text_data=json.dumps({
+            "request_new_ack": "game_start",
+            "game_id": game_id,
+        }))
 
     def request_notify_reject(self, event):
         request_id = event["request_id"]

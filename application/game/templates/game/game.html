@@ -22,6 +22,35 @@
             </div>
         </div>
         <div class="col-lg-4 bg-light m-0 p-0">
+            <div class="card m-3">
+                <div class="card-header text-white text-bold bg-primary">
+                    Informace o hře
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group p-0">
+                        <li class="list-group-item mb-0 pt-1 pb-1">
+                            <div class="row">
+                                <div class="col-6 user-username">
+                                    Hráč 1:
+                                </div>
+                                <div class="col-6 float-right text-right">
+                                    {{ game.player1.email }}
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item mb-0 pt-1 pb-1">
+                            <div class="row">
+                                <div class="col-6 user-username">
+                                    Hráč 2:
+                                </div>
+                                <div class="col-6 float-right text-right">
+                                    {{ game.player2.email }}
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             {% include "lobby/chat-panel.html" %}
         </div>
     </div>

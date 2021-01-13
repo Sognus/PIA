@@ -13,12 +13,38 @@ $(document).ready(function () {
 
         var ack = data["request_new_ack"];
 
+
+        if(ack === "already_game") {
+            alert_async("Uživatel je již ve hře");
+            return;
+        }
+
+        if(ack === "game_start") {
+            let game_id = data["game_id"];
+            window.location.replace(
+                'http://'
+                + window.location.host
+                 + '/game/'+game_id);
+        }
+
+        if(ack === "already_game_self") {
+            alert_async("Již jsi ve hře");
+            let game_id = data["game_id"];
+            window.location.replace(
+                'http://'
+                + window.location.host
+                 + '/game/'+game_id);
+            return;
+        }
+
         if(ack === "accept_missing") {
-            alert("Daný požadavek neexistuje!");
+            alert_async("Daný požadavek neexistuje!");
+            return;
         }
 
         if(ack === "wrong_type") {
             alert_async("Špatný typ požadavku");
+            return;
         }
 
         if(ack === "request_accept") {
