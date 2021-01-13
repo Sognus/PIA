@@ -126,7 +126,7 @@ class RequestConsumer(WebsocketConsumer):
                     self.send(text_data=json.dumps({"request_new_ack": "already_game"}))
                     return
 
-                    # Create game
+                # Create game
                 game_object = Game.create_game(req_object.sender, req_object.recipient)
 
                 # Notify players

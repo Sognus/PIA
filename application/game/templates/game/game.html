@@ -47,6 +47,16 @@
                                     {{ game.player2.email }}
                                 </div>
                             </div>
+                        <li class="list-group-item mb-0 pt-1 pb-1">
+                            <div class="row">
+                                <div class="col-6 user-username">
+                                    Herní symbol:
+                                </div>
+                                <div class="col-6 float-right text-right">
+                                    {{ side|upper }}
+                                </div>
+                            </div>
+                        </li>
                         </li>
                     </ul>
                 </div>
@@ -58,6 +68,8 @@
 
 {% block javascript %}
     {{ block.super }}
+
+    <script src="{% static 'game/js/chat.js' %}"></script>
 
     <script type="text/javascript">
         const stage = new Konva.Stage({

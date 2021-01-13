@@ -11,6 +11,7 @@ import os
 import django
 
 # Because Django Channels is stupid, we need to setup stuff here...
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pia.settings')
 django.setup()
 
@@ -21,8 +22,11 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 
 import lobby.routing
 import chat.routing
+import game.routing
 
-websocket_routing = chat.routing.websocket_urlpatterns + lobby.routing.websocket_urlpatterns
+websocket_routing = chat.routing.websocket_urlpatterns \
+                    + lobby.routing.websocket_urlpatterns \
+                    + game.routing.websocket_urlpatterns
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
