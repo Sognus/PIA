@@ -14,7 +14,8 @@ from online_users.models import OnlineUserActivity
 def index(request):
     # Get user activity
     user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
-    online = (user for user in user_activity_objects)
+    online = list(user for user in user_activity_objects)
+    online.sort(key=lambda x: x.user.email, reverse=False)
 
     # Get friendlist
     friendlist = Friends.get_friends_for(request.user)
@@ -48,5 +49,6 @@ def ajax_friend_remove(request, unfriend_id):
 def ajax_online_list(request):
     # Get user activity
     user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
-    online = (user for user in user_activity_objects)
+    online = list(user for user in user_activity_objects)
+    online.sort(key=lambda x: x.user.email, reverse=False)
     return render(request, "lobby/user-list.html", {"onlinelist": online, "currentUser": request.user})

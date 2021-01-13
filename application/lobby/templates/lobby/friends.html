@@ -31,7 +31,11 @@
                                     <button class="btn btn-danger btn-sm friends-button request-game-send" name="chat-button-send"
                                             id="chat-button-send"
                                             data-id="{{ friend.id }}"
-                                            type="button">Vyzvat
+                                            type="button"
+                                            {% if status != "online" %}
+                                                disabled
+                                            {% endif %}
+                                            >Vyzvat
                                     </button>
                                 </div>
                             </div>

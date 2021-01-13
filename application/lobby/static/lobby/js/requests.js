@@ -59,6 +59,12 @@ $(document).ready(function () {
             return;
         }
 
+        if(ack === "not_online") {
+            alert_async("Cílový uživatel není online!");
+            return;
+
+        }
+
         if(ack === "accept_permission") {
             alert_async("Na danou akci nemáte práva!");
             return;

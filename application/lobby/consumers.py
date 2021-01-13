@@ -1,8 +1,10 @@
 import json
+from datetime import timedelta
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.contrib.auth.models import User
+from online_users.models import OnlineUserActivity
 
 from .models import UserRequests, Friends
 
@@ -132,9 +134,19 @@ class RequestConsumer(WebsocketConsumer):
                 recipient = User.objects.filter(id=id).first()
                 target_group = "requests_user_" + str(recipient.id)
 
-                # Check if user wants to friend himself
+                # Check if user wants to play game with himself
                 if recipient == self.user_object:
                     self.send(text_data=json.dumps({"request_new_ack": "game_self"}))
+                    return
+
+                # Check if recipient is online
+                # TODO:
+                user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
+                online = (user.user.id for user in user_activity_objects)
+
+                # User is not online
+                if not recipient.id in online:
+                    self.send(text_data=json.dumps({"request_new_ack": "not_online"}))
                     return
 
                 # Check if recipient have pending request
