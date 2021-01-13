@@ -14,6 +14,7 @@
     <script src="{% static 'lobby/js/onlinelist.js' %}"></script>
     <script src="{% static 'lobby/js/chat.js' %}"></script>
     <script src="{% static 'lobby/js/requests.js' %}"></script>
+    <script src="{% static 'lobby/js/gamelist.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -56,6 +57,10 @@
 
                 <div id="ajax-friends-data">
                     {% include "lobby/friends.html" with friendlist=friendlist %}
+                </div>
+
+                <div id="ajax-gamelist-data">
+                    {% include "lobby/game-list.html" with gamelist=gamelist %}
                 </div>
             </div>
         </div>

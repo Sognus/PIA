@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
+from game.models import Game
 from .models import Friends, UserRequests
 
 from online_users.models import OnlineUserActivity
@@ -23,8 +24,11 @@ def index(request):
     # Get unanswered requests
     userRequestList = UserRequests.get_unanswered_for(request.user)
 
+    # Get gamelist
+    gamelist = Game.objects.all()
+
     # Render page
-    return render(request, "lobby/lobby.html", {"user": request.user, "onlinelist": online, "friendlist": friendlist, "userRequestList": userRequestList})
+    return render(request, "lobby/lobby.html", {"user": request.user, "onlinelist": online, "friendlist": friendlist, "userRequestList": userRequestList, "gamelist": gamelist})
 
 
 #
@@ -52,3 +56,11 @@ def ajax_online_list(request):
     online = list(user for user in user_activity_objects)
     online.sort(key=lambda x: x.user.email, reverse=False)
     return render(request, "lobby/user-list.html", {"onlinelist": online, "currentUser": request.user})
+
+
+@login_required
+def ajax_game_list(request):
+    # Get games
+    games = list(Game.objects.all())
+    games.sort(key=lambda x: x.id)
+    return render(request, "lobby/game-list.html", {"gamelist": games})
