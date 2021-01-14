@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.utils.timezone import now
 
 # Create your models here.
 from django.db.models import Q
@@ -11,16 +11,10 @@ class Game(models.Model):
         verbose_name = 'Hra'
         verbose_name_plural = 'Hry'
 
-    WINNERS = (
-        (0, "noone"),
-        (1, "player1"),
-        (2, "player2"),
-    )
-
     player1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="player1")
     player2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="player2")
     completed = models.BooleanField(default=False)
-    winner = models.IntegerField(default=0, choices=WINNERS)
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, default=None, related_name="winner", null=True)
 
     @staticmethod
     def create_game(sender, recipient):
@@ -28,7 +22,7 @@ class Game(models.Model):
         game_object.player1 = sender
         game_object.player2 = recipient
         game_object.completed = False
-        game_object.winner = 0
+        game_object.winner = None
         game_object.save()
         return game_object
 
@@ -50,7 +44,7 @@ class GameAction(models.Model):
         verbose_name_plural = 'Kola hry'
 
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="game")
-    date = models.DateTimeField('time')
+    date = models.DateTimeField('time', default=now)
     x = models.IntegerField()
     y = models.IntegerField()
     who = models.ForeignKey(User, on_delete=models.CASCADE, related_name="who")

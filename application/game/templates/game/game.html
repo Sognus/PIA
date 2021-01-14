@@ -3,11 +3,18 @@
 
 {% block css %}
     {{ super.block }}
+
+    <link rel="stylesheet" href="{% static "game/css/chat.css" %}">
+
     <style>
         #playground {
             width: 100%;
             height: 100%;
             overflow: hidden;
+        }
+
+        #game-chat-container {
+            max-height: 300px;
         }
     </style>
 {% endblock %}
@@ -61,7 +68,9 @@
                     </ul>
                 </div>
             </div>
-            {% include "lobby/chat-panel.html" %}
+            <div id="game-chat-container">
+                {% include "lobby/chat-panel.html" %}
+            </div>
         </div>
     </div>
 {% endblock %}
@@ -72,6 +81,110 @@
     <script src="{% static 'game/js/chat.js' %}"></script>
 
     <script type="text/javascript">
+        let gameSocket = null;
+
+        // Process incoming websocket messages
+        var socket_message_receive = function (e) {
+            const data = JSON.parse(e.data);
+            var action = data["action"];
+
+            // Game end - someone won
+            if(action === "game_completed") {
+                var winner = data["winner"];
+                gameSocket.close()
+                alert("Hra skončila, vítěz: " + winner);
+                // reload page to force user out
+                location.reload();
+            }
+
+            // Load data from server
+            if(action === "load") {
+                for(var key in data) {
+                    // Skip action
+                    if(key === "action") {
+                        continue;
+                    }
+
+                    var gameAction = data[key];
+                    drawPlayerAction(gameAction["x"], gameAction["y"], gameAction["symbol"]);
+                }
+                // Refresh canvas
+                layer.destroyChildren();
+                checkShapes();
+                layer.draw();
+            }
+
+
+
+            // Notification for claim from server
+            if(action === "claimed") {
+                var x = data["x"];
+                var y = data["y"];
+                var who = data["symbol"];
+
+                // Draw action and refresh
+                drawPlayerAction(x, y, who);
+                layer.destroyChildren();
+                checkShapes();
+                layer.draw();
+            }
+
+            // Respose for claim action
+            if(action === "claim_ack") {
+                var status =  data["status"];
+                if(status === "ERR") {
+                    var status_message = data["status_message"];
+                    alert(status_message);
+                }
+            }
+
+        }
+
+        // Send game load request
+        function socket_onopen() {
+            // Build data object
+            var json_data = {};
+            json_data["action"] = "load";
+
+            // Transform data object to json
+            var send_json = JSON.stringify(json_data);
+
+            // Send message through websocket
+            gameSocket.send(send_json);
+
+        }
+
+        function socket_send_claim_message(x, y) {
+            // Build data object
+            var json_data = {};
+            json_data["action"] = "claim";
+            json_data["x"] = x;
+            json_data["y"] = y;
+
+            // Transform data object to json
+            var send_json = JSON.stringify(json_data);
+
+            // Send message through websocket
+            gameSocket.send(send_json);
+        }
+
+        // Create Websocket
+        function socket_connect() {
+            if (gameSocket != null) {
+                return
+            }
+
+            gameSocket = new WebSocket(
+                'ws://'
+                + window.location.host
+                + '/ws/game'
+            );
+
+            gameSocket.onopen = socket_onopen;
+            //gameSocket.onclose = socket_onclose;
+            gameSocket.onmessage = socket_message_receive;
+        }
+
         // Create constants for square sizes
         const WIDTH = 100;
         const HEIGHT = 100;
@@ -120,12 +233,12 @@
                 //fill: color,
                 fillPatternImage: image,
                 fillPatternRepeat: 'no-repeat',
-                fillPatternScaleY:scaleY,
-                fillPatternScaleX:scaleX,
+                fillPatternScaleY: scaleY,
+                fillPatternScaleX: scaleX,
                 zindex: 0,
             });
             // Add new rectangle to playground storage
-            if(gameGrid[x] === undefined) {
+            if (gameGrid[x] === undefined) {
                 gameGrid[x] = {};
             }
             gameGrid[x][y] = newRect;
@@ -172,9 +285,13 @@
                         //      Stop function if message is not OK, eg. TAKEN, NOT_TURN
                         //      If everything is OK
 
-                        let who = "o"
+                        // Send socket claim message
+                        socket_send_claim_message(this.coordX, this.coordY);
+
+                        //let who = "o"
                         // Draw new player action - eg. o or x
-                        drawPlayerAction(this.coordX, this.coordY, who)
+                        //drawPlayerAction(this.coordX, this.coordY, who)
+
                         // Refresh canvas
                         layer.destroyChildren();
                         checkShapes();
@@ -209,15 +326,20 @@
             layer.draw()
         }
 
-        // Initial draw of playground
-        checkShapes();
-        layer.draw();
-
         // Redraw playground on drag
         stage.on('dragend', () => {
             layer.destroyChildren();
             checkShapes();
             layer.draw();
         })
+
+        // Initial draw of playground
+        $(document).ready(function () {
+            checkShapes();
+            layer.draw();
+            // Connect socket
+            socket_connect()
+        });
+
     </script>
 {% endblock %}

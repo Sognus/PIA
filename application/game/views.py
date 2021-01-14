@@ -1,9 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from game.models import Game
 
-
+@login_required(login_url='/')
 def index(request):
     user = request.user
     game_object = Game.get_active_game(user)
@@ -12,7 +13,7 @@ def index(request):
     else:
         return HttpResponseRedirect("/game/"+str(game_object.id))
 
-
+@login_required(login_url='/')
 def game(request, game_id):
     user = request.user
     game_object = Game.objects.filter(id=game_id).first()
@@ -29,7 +30,7 @@ def game(request, game_id):
     if game_object.completed:
         return HttpResponseRedirect("/lobby")
 
-    side = "o" if user == game_object.player1 else "x"
+    side = "x" if user == game_object.player1 else "o"
 
     # Render template
     return render(request, "game/game.html", {"game": game_object, "side": side})

@@ -21,10 +21,8 @@
                             <div class="col-8 float-right text-right">
                                 {% if game.completed is True %}
                                     Hra dokončena,
-                                    {% if game.winner == 1 %}
-                                        vítěz {{ game.player1.email }}
-                                    {% elif game.winner == 2 %}
-                                        vítěž {{ game.player2.email }}
+                                    {% if game.winner != None %}
+                                        vítěz {{ game.winner.email }}
                                     {% else %}
                                         remíza {{ game.player1.email }} a {{ game.player2.email }}
                                     {% endif %}
