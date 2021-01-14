@@ -1,7 +1,9 @@
+import datetime
 import json
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+from online_users.models import OnlineUserActivity
 
 from game.models import Game, GameAction
 
@@ -188,6 +190,30 @@ class GameConsumer(WebsocketConsumer):
         # TODO: check time between last player action
         # Something like a hello message with answer everything is OK
         # and if not just stop game
+        if action == "keep_alive":
+            # Get all users active last 5 minutes
+            user_activity_objects = OnlineUserActivity.get_user_activities(datetime.timedelta(minutes=5))
+            onlinelist = [user.user for user in user_activity_objects]
+
+            # Check if both users are still online
+            if self.game.player1 not in onlinelist or self.game.player2 not in onlinelist:
+                # Inform remaining players
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'game_notify_end',
+                        'action': "game_completed",
+                        "winner": "draw",
+                    }
+                )
+                # End game - draw
+                self.game.completed = True
+                self.game.save()
+            else:
+                # Send OK
+                self.send(text_data=json.dumps({
+                    "keep_alive": "ok",
+                }))
 
         # Notify game abandon
         if action == "game_abandon":

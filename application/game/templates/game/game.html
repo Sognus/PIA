@@ -164,7 +164,12 @@
             if (action === "game_completed") {
                 var winner = data["winner"];
                 gameSocket.close()
-                alert("Hra skončila, vítěz: " + winner);
+
+                if(winner !== "draw") {
+                    alert("Hra skončila, vítěz: " + winner);
+                } else {
+                    alert("Hra skončila - druhý hráč se odpojil");
+                }
                 // reload page to force user out
                 location.reload();
             }
@@ -423,5 +428,15 @@
             socket_connect()
         });
 
+        // Set timeout for keep-alive
+        var send_keep_alive = function () {
+            var json_data = {};
+            json_data["action"] = "keep_alive";
+            var send_json = JSON.stringify(json_data);
+            gameSocket.send(send_json);
+        }
+
+        // Set timeout for keepAlive
+        KeepAliveInterval = setInterval(send_keep_alive, 1000);
     </script>
 {% endblock %}

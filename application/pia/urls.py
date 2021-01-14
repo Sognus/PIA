@@ -30,6 +30,8 @@ urlpatterns = [
     path('password-reset/<str:uuid_input>', views.password_reset, name='password_reset'),
     path('password-reset', views.password_reset_form, name='password_reset_form'),
     # URLS of Applications
+    path('admin/', include('administration.urls', namespace='api')),
+    path('api/', include('api.urls', namespace='api')),
     path('lobby/', include('lobby.urls', namespace='lobby')),
     path('polls/', include('polls.urls', namespace='polls')),
     path('game/', include('game.urls', namespace='game')),

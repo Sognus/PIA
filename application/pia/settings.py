@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'game.apps.GameConfig',
     'lobby.apps.LobbyConfig',
     'polls.apps.PollsConfig',
+    "api.apps.ApiConfig",
+    "administration.apps.AdministrationConfig",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

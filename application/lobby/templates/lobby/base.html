@@ -42,11 +42,17 @@
             <ul class="navbar-nav ml-auto">
 
                 <li class="nav-item active">
-                    <a class="nav-link" href="/lobby">User: {{ user.email }}
+                    <a class="nav-link" href="/lobby">Přihlášen jako: {{ user.email }}
                     </a>
                 </li>
+                {% if user.is_staff %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="/admin">Administrace
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout">Logout</a>
+                    <a class="nav-link" href="/logout">Odhlášení</a>
                 </li>
             </ul>
         </div>
