@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from game.models import Game
@@ -13,6 +13,12 @@ from online_users.models import OnlineUserActivity
 # Redirect non-logged user to login page
 @login_required(login_url='/')
 def index(request):
+    # Redirect to active game
+    user = request.user
+    game_object = Game.get_active_game(user)
+    if game_object is not None:
+        return HttpResponseRedirect("/game/")
+
     # Get user activity
     user_activity_objects = OnlineUserActivity.get_user_activities(timedelta(minutes=3))
     online = list(user for user in user_activity_objects)

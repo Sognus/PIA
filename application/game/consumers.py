@@ -189,6 +189,28 @@ class GameConsumer(WebsocketConsumer):
         # Something like a hello message with answer everything is OK
         # and if not just stop game
 
+        # Notify game abandon
+        if action == "game_abandon":
+            # Winner of game is other user
+            winner = self.game.player2 if self.user == self.game.player1 else self.game.player2
+
+            # Notify everyone about end of game
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'game_notify_end',
+                    'action': "game_completed",
+                    "winner": winner.email,
+                }
+            )
+
+            # Mark game as completed
+            self.game.completed = True
+            # Set winner
+            self.game.winner = winner
+            # Save game to database
+            self.game.save()
+
         # Request game state action
         if action == "load":
             # Get all actions for game

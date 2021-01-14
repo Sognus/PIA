@@ -80,6 +80,29 @@
                     </ul>
                 </div>
             </div>
+            <div class="row pl-3 pr-3">
+                <div class="modal fade" id="ConfirmModalCenter" tabindex="-1" role="dialog"
+                     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Opravdu chcete opustit hru?</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zůstat</button>
+                                <button type="button" class="btn btn-danger" id="game-abandon-confirm">Opustit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button id="game_abandon" class="btn btn-danger col-12" data-toggle="modal" data-target="#ConfirmModalCenter">Opustit hru</button>
+                </div>
+            </div>
             <div id="game-chat-container">
                 {% include "lobby/chat-panel.html" %}
             </div>
@@ -95,15 +118,32 @@
     <script type="text/javascript">
         let gameSocket = null;
 
+        // Event button confirm in modal
+        $('#game-abandon-confirm').on('click', function (event) {
+            var json_data = {};
+            json_data["action"] = "game_abandon";
+
+            var send_json = JSON.stringify(json_data);
+
+            // Send message through websocket
+            gameSocket.send(send_json);
+
+            // Close modal completely
+            $('#ConfirmModalCenter').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+
+        })
+
         function set_can_play(symbol) {
             const turn = $("#turn");
             const turn_message = $("#turn-message");
             const play_as = $("#play_as");
 
-            console.log(play_as.text().toLowerCase().replace(/\s/g,''));
-            console.log(symbol.toLowerCase().replace(/\s/g,''));
+            console.log(play_as.text().toLowerCase().replace(/\s/g, ''));
+            console.log(symbol.toLowerCase().replace(/\s/g, ''));
 
-            if(play_as.text().toLowerCase().replace(/\s/g,'') === symbol.toLowerCase().replace(/\s/g,'')) {
+            if (play_as.text().toLowerCase().replace(/\s/g, '') === symbol.toLowerCase().replace(/\s/g, '')) {
                 // Same player
                 turn.removeClass("bg-danger");
                 turn.addClass("bg-success");
@@ -121,7 +161,7 @@
             var action = data["action"];
 
             // Game end - someone won
-            if(action === "game_completed") {
+            if (action === "game_completed") {
                 var winner = data["winner"];
                 gameSocket.close()
                 alert("Hra skončila, vítěz: " + winner);
@@ -130,10 +170,10 @@
             }
 
             // Load data from server
-            if(action === "load") {
-                for(var key in data) {
+            if (action === "load") {
+                for (var key in data) {
                     // Skip action
-                    if(key === "action") {
+                    if (key === "action") {
                         continue;
                     }
 
@@ -143,7 +183,7 @@
                 }
 
                 // Set who can play when game is empty
-                if(Object.keys(data).length < 2) {
+                if (Object.keys(data).length < 2) {
                     set_can_play("x");
                 }
 
@@ -154,9 +194,8 @@
             }
 
 
-
             // Notification for claim from server
-            if(action === "claimed") {
+            if (action === "claimed") {
                 var x = data["x"];
                 var y = data["y"];
                 var who = data["symbol"];
@@ -173,9 +212,9 @@
             }
 
             // Respose for claim action
-            if(action === "claim_ack") {
-                var status =  data["status"];
-                if(status === "ERR") {
+            if (action === "claim_ack") {
+                var status = data["status"];
+                if (status === "ERR") {
                     var status_message = data["status_message"];
                     alert(status_message);
                 }
