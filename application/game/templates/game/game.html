@@ -16,6 +16,13 @@
         #game-chat-container {
             max-height: 300px;
         }
+
+        #turn {
+            min-height: 50px;
+            max-height: 50px;
+            line-height: 50px;
+            font-weight: bold;
+        }
     </style>
 {% endblock %}
 
@@ -23,6 +30,11 @@
     <div class="row col-lg-12 mr-0 ml-0 pl-0 pr-0">
         <div class="col-lg-8 bg-light m-0 p-0">
             <div class="p-3">
+                <div id="turn" class="row text-white bg-danger">
+                    <div class="col-12 text-center text-bold " id="turn-message">
+                        Na tahu je druhý hráč
+                    </div>
+                </div>
                 <div id="playground">
 
                 </div>
@@ -59,7 +71,7 @@
                                 <div class="col-6 user-username">
                                     Herní symbol:
                                 </div>
-                                <div class="col-6 float-right text-right">
+                                <div id="play_as" class="col-6 float-right text-right">
                                     {{ side|upper }}
                                 </div>
                             </div>
@@ -82,6 +94,26 @@
 
     <script type="text/javascript">
         let gameSocket = null;
+
+        function set_can_play(symbol) {
+            const turn = $("#turn");
+            const turn_message = $("#turn-message");
+            const play_as = $("#play_as");
+
+            console.log(play_as.text().toLowerCase().replace(/\s/g,''));
+            console.log(symbol.toLowerCase().replace(/\s/g,''));
+
+            if(play_as.text().toLowerCase().replace(/\s/g,'') === symbol.toLowerCase().replace(/\s/g,'')) {
+                // Same player
+                turn.removeClass("bg-danger");
+                turn.addClass("bg-success");
+                turn_message.html("Nyní jsi na řadě");
+            } else {
+                turn.removeClass("bg-success");
+                turn.addClass("bg-danger");
+                turn_message.html("Na řadě je druhý hráč");
+            }
+        }
 
         // Process incoming websocket messages
         var socket_message_receive = function (e) {
@@ -107,7 +139,14 @@
 
                     var gameAction = data[key];
                     drawPlayerAction(gameAction["x"], gameAction["y"], gameAction["symbol"]);
+                    set_can_play(gameAction["symbol"]);
                 }
+
+                // Set who can play when game is empty
+                if(Object.keys(data).length < 2) {
+                    set_can_play("x");
+                }
+
                 // Refresh canvas
                 layer.destroyChildren();
                 checkShapes();
@@ -124,6 +163,10 @@
 
                 // Draw action and refresh
                 drawPlayerAction(x, y, who);
+                // Set who can play
+                var who_inv = who.toLowerCase() === "x" ? "o" : "x"
+                set_can_play(who_inv);
+
                 layer.destroyChildren();
                 checkShapes();
                 layer.draw();
