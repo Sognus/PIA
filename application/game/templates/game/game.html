@@ -72,6 +72,23 @@
     <script src="{% static 'game/js/chat.js' %}"></script>
 
     <script type="text/javascript">
+        // Create constants for square sizes
+        const WIDTH = 100;
+        const HEIGHT = 100;
+
+        // Create constants for square color pattern
+        const grid = [
+            ['white', 'blue'],
+            ['blue', 'white'],
+        ];
+
+        // Load images
+        const image_x = new Image();
+        image_x.src = "http://" + window.location.host + "{% static 'game/img/ttt-x.png' %}";
+        const image_o = new Image();
+        image_o.src = "http://" + window.location.host + "{% static 'game/img/ttt-o.png' %}";
+
+        // Define playground render
         const stage = new Konva.Stage({
             container: 'playground',
             width: window.innerWidth,
@@ -79,38 +96,62 @@
             draggable: true
         });
 
-        // Current grid
+        // Create Storage for player-edited squares
         const gameGrid = {}
 
+        // Create main Layer and add it to playground
         const layer = new Konva.Layer();
         stage.add(layer);
 
+        // Draw new player input
+        function drawPlayerAction(x, y, who) {
+            // Create new rectangle and add it to grid
+            let color = who === "x" ? "back" : "red"
+            let image = who === "x" ? image_x : image_o
 
-        const WIDTH = 100;
-        const HEIGHT = 100;
+            let scaleY = HEIGHT / image.height;
+            let scaleX = WIDTH / image.width;
 
-        const grid = [
-            ['white', 'blue'],
-            ['blue', 'white'],
-        ];
+            var newRect = new Konva.Rect({
+                x: x * WIDTH,
+                y: y * HEIGHT,
+                width: WIDTH,
+                height: HEIGHT,
+                //fill: color,
+                fillPatternImage: image,
+                fillPatternRepeat: 'no-repeat',
+                fillPatternScaleY:scaleY,
+                fillPatternScaleX:scaleX,
+                zindex: 0,
+            });
+            // Add new rectangle to playground storage
+            if(gameGrid[x] === undefined) {
+                gameGrid[x] = {};
+            }
+            gameGrid[x][y] = newRect;
+        }
 
+        // Create function to render playground including players input
         function checkShapes() {
+            // Calculate visible parts of stage
             const startX = Math.floor((-stage.x() - stage.width()) / WIDTH) * WIDTH;
             const endX = Math.floor((-stage.x() + stage.width() * 2) / WIDTH) * WIDTH;
 
             const startY = Math.floor((-stage.y() - stage.height()) / HEIGHT) * HEIGHT;
             const endY = Math.floor((-stage.y() + stage.height() * 2) / HEIGHT) * HEIGHT;
 
-
+            // For every x,y in game grid, create render
             for (var x = startX; x < endX; x += WIDTH) {
                 for (var y = startY; y < endY; y += HEIGHT) {
+                    // Get grid color pattern
                     const indexX = Math.abs(x / WIDTH) % grid.length;
                     const indexY = Math.abs(y / HEIGHT) % grid[0].length;
 
+                    // Get X,Y coordinations on grid
                     const coordX = (x / WIDTH);
                     const coordY = (y / HEIGHT);
 
-                    // Render grid
+                    // Create new rectangle object, and add additional info to it
                     var rect = new Konva.Rect({
                         x,
                         y,
@@ -120,25 +161,34 @@
                     })
                     rect.coordX = coordX;
                     rect.coordY = coordY;
+
+                    // Add event listener to created rectangle
                     rect.on("click tap", function () {
                         // Get item coords
                         console.log("[" + this.coordX + " , " + this.coordY + "]");
-                        // Render stuff over it
-                        var newRect = new Konva.Rect({
-                            x: this.coordX * WIDTH,
-                            y: this.coordY * HEIGHT,
-                            width: WIDTH,
-                            height: HEIGHT,
-                            fill: "red",
-                        });
-                        layer.add(newRect);
+
+                        // TODO: Send server request
+                        // TODO: Validate server request
+                        //      Stop function if message is not OK, eg. TAKEN, NOT_TURN
+                        //      If everything is OK
+
+                        let who = "o"
+                        // Draw new player action - eg. o or x
+                        drawPlayerAction(this.coordX, this.coordY, who)
+                        // Refresh canvas
+                        layer.destroyChildren();
+                        checkShapes();
                         layer.draw();
                     })
                     layer.add(rect);
-                    gameGrid[coordX] = {coordY: rect}
+
+                    // User input exist
+                    if (gameGrid[coordX] !== undefined && gameGrid[coordX][coordY] !== undefined) {
+                        layer.add(gameGrid[coordX][coordY]);
+                    }
 
 
-                    // Render debug coords
+                    // Create text inside square
                     var text = new Konva.Text({
                         text: '' + coordX + " , " + coordY,
                         x: x + WIDTH / 3,
@@ -146,18 +196,24 @@
                         width: WIDTH,
                         fontFamily: 'sans-serif',
                         fontSize: HEIGHT / 6,
-                        fill: 'red'
+                        fill: 'red',
+                        zindex: 1,
                     });
+                    // Add text to layer to render
                     layer.add(text);
 
                 }
             }
+
+            // Draw everything in layer
+            layer.draw()
         }
 
-
+        // Initial draw of playground
         checkShapes();
         layer.draw();
 
+        // Redraw playground on drag
         stage.on('dragend', () => {
             layer.destroyChildren();
             checkShapes();
