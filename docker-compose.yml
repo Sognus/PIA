@@ -33,6 +33,8 @@ services:
       - ./application:/app
     environment:
       - REDIS_HOST=redis
+      - DJANGO_SUPERUSER_PASSWORD=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@admin.cz
     depends_on:
       - database
       - redis

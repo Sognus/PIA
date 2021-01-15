@@ -7,6 +7,10 @@ while ! nc -z database 5432; do sleep 1; done;
 python3 manage.py collectstatic --noinput
 python3 manage.py makemigrations
 python3 manage.py migrate
+python3 manage.py createsuperuser \
+	--username "admin@admin.cz" \
+	--email "admin@admin.cz"  \
+	--noinput
 
 # Run ASGI server
 #gunicorn pia.asgi:application --reload --bind 0.0.0.0 -k uvicorn.workers.UvicornWorker
