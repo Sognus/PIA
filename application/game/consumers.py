@@ -6,6 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 from online_users.models import OnlineUserActivity
 
 from game.models import Game, GameAction
+from lobby.models import Announcements
 
 
 class WinDetector(object):
@@ -209,6 +210,11 @@ class GameConsumer(WebsocketConsumer):
                 # End game - draw
                 self.game.completed = True
                 self.game.save()
+
+                ann = Announcements()
+                ann.text = "Hra " + str(self.game.id) + " mezi " + str(self.game.player1.email) + " a " + str(self.game.player2.email) + " skončila remízou"
+                ann.save()
+
             else:
                 # Send OK
                 self.send(text_data=json.dumps({
@@ -236,6 +242,12 @@ class GameConsumer(WebsocketConsumer):
             self.game.winner = winner
             # Save game to database
             self.game.save()
+
+            ann = Announcements()
+            ann.text = "Hra " + str(self.game.id) + " mezi " + str(self.game.player1.email) + " a " + str(
+                self.game.player2.email) + " skončila vítězstvím " + str(self.game.winner.email) + "."
+            ann.save()
+
 
         # Request game state action
         if action == "load":
@@ -332,6 +344,12 @@ class GameConsumer(WebsocketConsumer):
                 self.game.completed = True
                 self.game.winner = self.user
                 self.game.save()
+
+                ann = Announcements()
+                ann.text = "Hra " + str(self.game.id) + " mezi " + str(self.game.player1.email) + " a " + str(
+                    self.game.player2.email) + " skončila vítězstvím " + str(self.game.winner.email) + "."
+                ann.save()
+
                 # Notify everyone of game end
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,

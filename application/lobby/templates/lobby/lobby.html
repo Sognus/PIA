@@ -15,11 +15,17 @@
     <script src="{% static 'lobby/js/chat.js' %}"></script>
     <script src="{% static 'lobby/js/requests.js' %}"></script>
     <script src="{% static 'lobby/js/gamelist.js' %}"></script>
+    <script src="{% static 'lobby/js/announcements.js' %}"></script>
 {% endblock %}
 
 {% block content %}
     <div class="row col-lg-12 mr-0 ml-0 pl-0 pr-0">
         <div class="col-lg-8 bg-light m-0 p-0">
+
+            <div id="announcement-ajax">
+                {% include "lobby/announcements.html" with announcements=announcements %}
+            </div>
+
             {% include "lobby/chat-panel.html" %}
         </div>
         <div class="col-lg-4 bg-light m-0 p-0">

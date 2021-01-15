@@ -12,9 +12,9 @@
                         <div class="row pl-0">
                             <div class="col-4 pl-0 ml-0 user-username">
                                 {% if game.completed is True %}
-                                    <span class="badge badge-pill badge-danger">&nbsp</span>
+                                    <span class="badge badge-pill badge-danger" title="hra dokončena">&nbsp</span>
                                 {% else %}
-                                    <span class="badge badge-pill badge-success">&nbsp</span>
+                                    <span class="badge badge-pill badge-success" title="hra probíhá">&nbsp</span>
                                 {% endif %}
                                 Hra <a href="/game/replay/{{ game.id }}">#{{ game.id }}</a>
                             </div>

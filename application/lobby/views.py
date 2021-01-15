@@ -1,11 +1,12 @@
 from datetime import timedelta
 
+from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from game.models import Game
-from .models import Friends, UserRequests
+from .models import Friends, UserRequests, Announcements
 
 from online_users.models import OnlineUserActivity
 
@@ -33,8 +34,11 @@ def index(request):
     # Get gamelist
     gamelist = Game.objects.all()
 
+    # Get announcements
+    announcements = Announcements.get_announcements_last_hour()
+
     # Render page
-    return render(request, "lobby/lobby.html", {"user": request.user, "onlinelist": online, "friendlist": friendlist, "userRequestList": userRequestList, "gamelist": gamelist})
+    return render(request, "lobby/lobby.html", {"user": request.user, "onlinelist": online, "friendlist": friendlist, "userRequestList": userRequestList, "gamelist": gamelist, "announcements": announcements})
 
 
 #
@@ -51,7 +55,23 @@ def ajax_friends(request):
 def ajax_friend_remove(request, unfriend_id):
     id1 = request.user.id
     id2 = unfriend_id
+
+    u2 = User.objects.filter(id=id2).first()
+
+    if u2 == None:
+        return HttpResponse(status=200)
+
+    # Remove friends
     Friends.remove_friend(id1, id2)
+
+    # Create announcement
+    u1 = request.user
+
+    ann = Announcements()
+    ann.text = "Uživatelé " + str(u1) + " a " + str(
+        u2.email) + " již nejsou přáteli."
+    ann.save()
+
     return HttpResponse(status=200)
 
 
@@ -70,3 +90,9 @@ def ajax_game_list(request):
     games = list(Game.objects.all())
     games.sort(key=lambda x: x.id)
     return render(request, "lobby/game-list.html", {"gamelist": games})
+
+@login_required
+def ajax_announcements(request):
+    # Get announcements
+    announcements = Announcements.get_announcements_last_hour()
+    return render(request, "lobby/announcements.html", {"announcements": announcements})

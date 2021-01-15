@@ -12,11 +12,11 @@
                         <div class="row pl-0">
                             <div class="col-7 pl-0 ml-0 user-username">
                                 {% if status == "online" %}
-                                    <span class="badge badge-pill badge-success">&nbsp</span>
+                                    <span class="badge badge-pill badge-success" title="online">&nbsp</span>
                                 {% elif status == "away" %}
-                                    <span class="badge badge-pill badge-warning">&nbsp</span>
+                                    <span class="badge badge-pill badge-warning" title="neaktivní">&nbsp</span>
                                 {% else %}
-                                    <span class="badge badge-pill badge-danger">&nbsp</span>
+                                    <span class="badge badge-pill badge-danger" title="offline">&nbsp</span>
                                 {% endif %}
                                 {{ friend.email }}
                             </div>

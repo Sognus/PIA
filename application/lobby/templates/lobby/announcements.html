@@ -1,0 +1,33 @@
+{% load static %}
+
+<div class="card m-3">
+    <div class="card-header bg-dark text-white text-bold">
+        Oznámení
+    </div>
+    <div class="card-body user-card  p-0">
+        <ul class="list-group p-0">
+            {% if announcements|length > 0 %}
+            {% for announcement in announcements %}
+                <li class="list-group-item mb-0 pt-1 pb-1">
+                    <div class="row">
+                        <div class="col-3 user-username">
+                            {{ announcement.time_sent }}
+                        </div>
+                        <div class="col-9">
+                            {{ announcement.text }}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+            {% else %}
+                <li class="list-group-item mb-0 pt-1 pb-1">
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            Žádná oznámení
+                        </div>
+                    </div>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

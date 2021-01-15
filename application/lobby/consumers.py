@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from online_users.models import OnlineUserActivity
 
 from game.models import Game
-from .models import UserRequests, Friends
+from .models import UserRequests, Friends, Announcements
 
 
 class RequestConsumer(WebsocketConsumer):
@@ -151,6 +151,11 @@ class RequestConsumer(WebsocketConsumer):
                     }
                 )
 
+                ann = Announcements()
+                ann.text = "Uživatelé " + str(game_object.player1.email) + " a " + str(
+                    game_object.player2.email) + " začali hru #" + str(game_object.id) + "."
+                ann.save()
+
                 return
 
             if rtype == "friend":
@@ -179,6 +184,11 @@ class RequestConsumer(WebsocketConsumer):
                 friend.user1 = req_object.sender
                 friend.user2 = req_object.recipient
                 friend.save()
+
+                # Announcement create
+                ann = Announcements()
+                ann.text = "Uživatelé " + str(friend.user1.email) + " a " + str(friend.user2.email) + " se stali přáteli."
+                ann.save()
 
                 # Notify rejecter to delete his record
                 self.send(text_data=json.dumps({"request_new_ack": "request_accept", "request_id": req_object.id}))
@@ -361,6 +371,11 @@ class RequestConsumer(WebsocketConsumer):
                     friend.user1 = self.user_object
                     friend.user2 = recipient
                     friend.save()
+
+                    ann = Announcements()
+                    ann.text = "Uživatelé " + str(friend.user1.email) + " a " + str(
+                        friend.user2.email) + " se stali přáteli."
+                    ann.save()
 
                     # Terminate rest of function
                     return

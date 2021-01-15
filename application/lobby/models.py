@@ -10,6 +10,21 @@ from django.utils.timezone import now
 from online_users.models import OnlineUserActivity
 
 
+class Announcements(models.Model):
+    class Meta:
+        verbose_name = 'Oznámení'
+        verbose_name_plural = 'Oznámení'
+
+    text = models.CharField(max_length=2048)
+    time_sent = models.DateTimeField('time sent', default=now)
+
+    @staticmethod
+    def get_announcements_last_hour():
+        now = timezone.now()
+        time_threshold = timezone.now() - datetime.timedelta(hours=1)
+        return Announcements.objects.filter(time_sent__range=(time_threshold, now)).order_by("-time_sent")
+
+
 class PasswordResets(models.Model):
     class Meta:
         verbose_name = 'Reset hesla'
