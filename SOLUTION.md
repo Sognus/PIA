@@ -15,6 +15,8 @@ NGINX a Daphne ASGI docker kontejner sdílejí složku application připojenou j
 
 NGINX je nastaven tak, aby poskytoval statické soubory jako javascript soubory, css styly či obrázky. Pro všechny ostatní požadavky funguje NGINX jako PROXY server, který předává požadavky Daphne ASGI kontejneru.
 
+Přesun statických souborů do složky static řeší framework django v Daphne ASGI kontejneru
+
 ## Daphne ASGI server
 
 Kontejner obsahující daphne server, který spouští a poskytuje přístup k DJANGO ASGI aplikaci na portu 8000. Kontejner obsahuje všechny potřebné závislosti pro spuštění aplikace
