@@ -4,6 +4,28 @@
 {% block head %}
     {{ block.super }}
     <link href="{% static 'core/css/register.css' %}" rel="stylesheet">
+
+    <style>
+    .pwstrength_viewport_progress {
+        height: 20px;
+        width: 100%;
+    }
+    </style>
+
+    <script type="text/javascript">
+        var options = {};
+        options.ui = {
+            container: "#password-strength",
+            viewports: {
+                progress: ".pwstrength_viewport_progress"
+            },
+            showVerdictsInsideProgressBar: true
+        };
+
+        $(document).ready(function () {
+            $('#id_password').pwstrength(options);
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -24,15 +46,15 @@
                         </div>
                     </div>
                     {% if form.errors.username is not None %}
-                    <div class="form-error">
-                        <div class="text-danger text-left">
-                            {% for key in form.errors.username %}
-                                - {{ key }} <br>
-                            {% endfor %}
+                        <div class="form-error">
+                            <div class="text-danger text-left">
+                                {% for key in form.errors.username %}
+                                    - {{ key }} <br>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
-                    <div class="form-group">
+                    <div class="form-group pb-0 mb-0">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">
@@ -42,14 +64,19 @@
                             {{ form.password }}
                         </div>
                     </div>
-                    {% if form.errors.password is not None %}
-                    <div class="form-error">
-                        <div class="text-danger text-left">
-                            {% for key in form.errors.password %}
-                                - {{ key }} <br>
-                            {% endfor %}
+                    <div class="form-group pt-0">
+                        <div class="input-group" id="password-strength">
+                            <div class="pwstrength_viewport_progress"></div>
                         </div>
                     </div>
+                    {% if form.errors.password is not None %}
+                        <div class="form-error">
+                            <div class="text-danger text-left">
+                                {% for key in form.errors.password %}
+                                    - {{ key }} <br>
+                                {% endfor %}
+                            </div>
+                        </div>
                     {% endif %}
                     <div class="form-group">
                         <div class="input-group">
@@ -62,22 +89,22 @@
                         </div>
                     </div>
                     {% if form.errors.password2 is not None %}
-                    <div class="form-error">
-                        <div class="text-danger text-left">
-                            {% for key in form.errors.password2 %}
-                                - {{ key }} <br>
-                            {% endfor %}
+                        <div class="form-error">
+                            <div class="text-danger text-left">
+                                {% for key in form.errors.password2 %}
+                                    - {{ key }} <br>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
                     {% if form.errors.hidden is not None %}
-                    <div class="form-error">
-                        <div class="text-danger text-left">
-                            {% for key in form.errors.hidden %}
-                                - {{ key }} <br>
-                            {% endfor %}
+                        <div class="form-error">
+                            <div class="text-danger text-left">
+                                {% for key in form.errors.hidden %}
+                                    - {{ key }} <br>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary login-btn btn-block">Registrovat se</button>
