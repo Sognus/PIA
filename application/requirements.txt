@@ -8,3 +8,5 @@ redis
 channels_redis
 websockets
 daphne
+uvloop
+uvicorn
